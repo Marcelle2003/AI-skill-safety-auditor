@@ -90,3 +90,4 @@ Reading or exfiltrating `~/.ssh`, browser profiles, cloud CLI config dirs, or wa
 - Cursor project: `.cursor/skills/`
 - Claude Code personal: `~/.claude/skills/`
 - Claude Code project: `.claude/skills/`
+- **Claude web app (cloud):** no skills directory — user uploads a **ZIP** with `SKILL.md` at archive root; default package path: `Downloads/skill-safety-auditor-for-claude-app.zip` (see `README.md`)

@@ -1,6 +1,6 @@
 ---
 name: skill-safety-auditor
-description: Audit third-party Cursor/Claude skills for malware and supply-chain risk, then install only if strict safety gates pass. Use when users ask whether a skill is safe, want a pre-install review, or request safer installation workflows.
+description: Audit third-party Cursor/Claude skills for malware and supply-chain risk, then install only if strict safety gates pass. Supports local skills directories (Cursor, Claude Code) and ZIP packaging for Claude web app upload. Use when users ask whether a skill is safe, want a pre-install review, or request safer installation workflows.
 ---
 
 # Skill Safety Auditor
@@ -16,21 +16,35 @@ This skill uses strict gates and only installs after checks pass and user policy
 - Repo workflow: pre-check remote first, clone only after initial pass
 - Install mode: safe install commands with user confirmation on warnings
 - Network policy: allow documented outbound API calls tied to declared function
-- Platform support: Cursor and Claude Code
+- Platform support: Cursor, Claude Code (local skills dirs), and Claude web app (ZIP upload — no skills directory)
 
 ## Inputs Required
 
 Ask for:
 
 1. Skill source (prefer GitHub repo URL)
-2. Target runtime (`cursor`, `claude-code`, or both)
-3. Target install scope (personal vs project)
-4. Whether user approves dependency installation (`pip`, `npm`, `playwright install`, etc.)
-5. **Install confirmation mode**:
+2. **How they will use this auditor skill (or how teammates should install it):**
+   - **`install`** — local skills directory: **Cursor** and/or **Claude Code** (`~/.cursor/skills/`, `~/.claude/skills/`). Not for Claude web app.
+   - **`zip`** — **Claude web app (cloud)**: user uploads a ZIP; there is no personal skills folder in the browser. Package the skill so **`SKILL.md` is at the root of the ZIP** and save the archive to the user’s **Downloads** folder (Windows: `%USERPROFILE%\Downloads`, macOS/Linux: `~/Downloads`).
+   - If unclear, ask: *“Do you use Claude in the browser (upload a skill ZIP) or Claude Code / Cursor (folder on disk)?”*
+3. Target runtime for **install** mode only: `cursor`, `claude-code`, or both (ignored for `zip` mode)
+4. Target install scope for **install** mode only: personal vs project
+5. Whether user approves dependency installation (`pip`, `npm`, `playwright install`, etc.) when auditing *other* repos
+6. **Install confirmation mode** (audited third-party installs):
    - `default`: after `PASS`, proceed with safe install commands without an extra confirm step
    - `always_confirm`: after `PASS`, still ask once before running any install or dependency command
 
 If source is missing, stop and request it.
+
+### When the user wants a ZIP for Claude web app
+
+Do **not** tell them to copy files to `~/.claude/skills/` — that path is for **Claude Code**, not the cloud product.
+
+1. Ensure the folder to zip contains `SKILL.md`, `POLICY.md`, `README.md`, and `scripts/` at the **top level** of that folder.
+2. Create a ZIP whose **root entries** are those files/folders (not a single nested folder like `repo-main/` only — unless the product docs say otherwise; default is flat root with `SKILL.md` visible at top level of the archive).
+3. On **Windows**, default output path: `%USERPROFILE%\Downloads\skill-safety-auditor-for-claude-app.zip`
+4. On **macOS/Linux**, default: `~/Downloads/skill-safety-auditor-for-claude-app.zip`
+5. Give them the README one-liners or equivalent `Compress-Archive` / `zip` commands.
 
 ## Untrusted content handling (prompt injection)
 
@@ -186,7 +200,7 @@ Block installation if any of these are found:
 
 ## Runtime-Aware Install Targets
 
-Map install commands to selected runtime:
+Map **install** commands to selected runtime (skip this section if the user chose **`zip`** for Claude web app):
 
 - **Cursor personal skill**: `~/.cursor/skills/<skill-name>/`
 - **Cursor project skill**: `.cursor/skills/<skill-name>/`
@@ -194,6 +208,8 @@ Map install commands to selected runtime:
 - **Claude Code project skill**: `.claude/skills/<skill-name>/`
 
 If user selects “both”, produce commands for both targets.
+
+**Claude web app (cloud):** no on-disk skills root — user uploads a ZIP from Downloads (or another path they choose). Do not conflate with Claude Code.
 
 ## Output Format
 
