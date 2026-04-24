@@ -4,6 +4,28 @@
 
 Agent skill for auditing third-party Cursor/Claude skills before install: remote pre-check, clone, local scan (including optional `scripts/audit_skill_repo.*`), and safe install steps. See `SKILL.md` for the full workflow and `POLICY.md` for severity rules.
 
+### One-line install (Windows + Claude Code)
+
+Paste into **PowerShell** or **Windows Terminal** (requires [Git for Windows](https://git-scm.com/download/win); free install, defaults are fine):
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null; git clone https://github.com/Marcelle2003/AI-skill-safety-auditor.git "$env:USERPROFILE\.claude\skills\skill-safety-auditor"
+```
+
+If the folder already exists, remove it first, then run the line again:
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\skill-safety-auditor" -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null; git clone https://github.com/Marcelle2003/AI-skill-safety-auditor.git "$env:USERPROFILE\.claude\skills\skill-safety-auditor"
+```
+
+**No Git?** One-liner using only PowerShell (downloads the repo zip):
+
+```powershell
+$s="$env:USERPROFILE\.claude\skills\skill-safety-auditor"; $p=Split-Path $s; New-Item -ItemType Directory -Force -Path $p | Out-Null; Remove-Item -Recurse -Force $s -ErrorAction SilentlyContinue; $z="$env:TEMP\ai-skill-safety.zip"; Invoke-WebRequest -Uri "https://github.com/Marcelle2003/AI-skill-safety-auditor/archive/refs/heads/main.zip" -OutFile $z -UseBasicParsing; Expand-Archive -Path $z -DestinationPath "$env:TEMP\ai-skill-safety-x" -Force; Move-Item -Path (Join-Path "$env:TEMP\ai-skill-safety-x" "AI-skill-safety-auditor-main") -Destination $s -Force; Remove-Item $z -Force; Remove-Item "$env:TEMP\ai-skill-safety-x" -Recurse -Force
+```
+
+Then restart Claude Code or open a new session so it picks up `~/.claude/skills/skill-safety-auditor/SKILL.md`.
+
 ## Install for Cursor
 
 Personal (all projects):
